@@ -1,0 +1,22 @@
+name: crossplane-e2e
+
+on:
+  schedule:
+    - cron: '0 12 * * *'
+
+env:
+  KIND_VERSION: 'v0.7.0'
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          repository: crossplane/crossplane
+          ref: master
+      - uses: engineerd/setup-kind@v0.5.0
+        with:
+          version: ${{ env.KIND_VERSION }}
+      - name: Run E2E Tests
+        run: go test -timeout 10m -v --tags=e2e ./test/e2e/...
