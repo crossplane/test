@@ -3,6 +3,7 @@ name: crossplane-e2e
 on:
   schedule:
     - cron: '0 12 * * *'
+  workflow_dispatch: {}
 
 env:
   KIND_VERSION: 'v0.7.0'
