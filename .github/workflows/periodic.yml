@@ -10,7 +10,7 @@ env:
   KIND_VERSION: 'v0.7.0'
 
 jobs:
-  e2e-tests:
+  e2e-tests-latest:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Crossplane Repo
@@ -29,8 +29,32 @@ jobs:
       - name: Create Namespace
         run: kubectl create namespace crossplane-system
         shell: bash
-      - name: Install Crossplane from latest on Master
+      - name: Install Crossplane from Master
         run: helm repo add crossplane-master https://charts.crossplane.io/master/ && helm repo update && helm install crossplane --namespace crossplane-system crossplane-master/crossplane --devel
+        shell: bash
+      - name: Run E2E Tests
+        run: go test -timeout 10m -v --tags=e2e ./test/e2e/...
+  e2e-tests-stable:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Crossplane Repo
+        uses: actions/checkout@v2
+        with:
+          repository: crossplane/crossplane
+          ref: release-1.0
+      - name: Setup Kind
+        uses: engineerd/setup-kind@v0.5.0
+        with:
+          version: ${{ env.KIND_VERSION }}
+      - name: Install Helm
+        uses: azure/setup-helm@v1
+      - name: Install Kubectl
+        uses: azure/setup-kubectl@v1
+      - name: Create Namespace
+        run: kubectl create namespace crossplane-system
+        shell: bash
+      - name: Install Crossplane from Stable
+        run: helm repo add crossplane-stable https://charts.crossplane.io/stable && helm repo update && helm install crossplane --namespace crossplane-system crossplane-stable/crossplane
         shell: bash
       - name: Run E2E Tests
         run: go test -timeout 10m -v --tags=e2e ./test/e2e/...
