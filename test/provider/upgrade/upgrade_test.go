@@ -59,7 +59,7 @@ func TestProviderUpgrade(t *testing.T) {
 				if err != nil {
 					return err
 				}
-				a := resource.NewAPIPatchingApplicator(c)
+				a := resource.NewAPIUpdatingApplicator(c)
 				provider := &v1.Provider{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: providerName,
@@ -99,7 +99,6 @@ func TestProviderUpgrade(t *testing.T) {
 
 				// Update Provider package.
 				provider.Spec.Package = upgradeProviderPackage
-				provider.SetResourceVersion("")
 				if err := a.Apply(ctx, provider); err != nil {
 					return err
 				}
