@@ -20,6 +20,7 @@ package provider
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -32,22 +33,24 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	v1 "github.com/crossplane/crossplane/apis/pkg/v1"
-)
 
-const (
-	providerName           = "provider-gcp"
-	initialProviderPackage = "crossplane/provider-gcp:v0.16.0"
-	upgradeProviderPackage = "crossplane/provider-gcp:master"
+	c "github.com/crossplane/test/apis/provider"
 )
 
 func TestProviderUpgrade(t *testing.T) {
 	cases := map[string]struct {
 		reason string
-		body   func() error
+		body   func(providerPackage string, upgradeVersion c.UpgradeProviderVersion) error
 	}{
-		"UpgradeProviderGCPStableToLatest": {
-			reason: "Should be able to successfully update provider-gcp from latest stable to latest development build.",
-			body: func() error {
+		"UpgradeProviderStableToLatest": {
+			reason: "Should be able to successfully update provider from latest stable to latest development build.",
+			body: func(providerPackage string, upgradeVersion c.UpgradeProviderVersion) error {
+
+				sl := strings.SplitAfter(providerPackage, "/")
+				packageName := sl[len(sl)-1]
+				initialProviderPackage := providerPackage + ":" + upgradeVersion.Initial
+				upgradeProviderPackage := providerPackage + ":" + upgradeVersion.Final
+
 				ctx := context.Background()
 				s := runtime.NewScheme()
 				if err := v1.AddToScheme(s); err != nil {
@@ -62,7 +65,7 @@ func TestProviderUpgrade(t *testing.T) {
 				a := resource.NewAPIUpdatingApplicator(c)
 				provider := &v1.Provider{
 					ObjectMeta: metav1.ObjectMeta{
-						Name: providerName,
+						Name: packageName,
 					},
 					Spec: v1.ProviderSpec{
 						PackageSpec: v1.PackageSpec{
@@ -148,11 +151,19 @@ func TestProviderUpgrade(t *testing.T) {
 			},
 		},
 	}
-	for name, tc := range cases {
-		t.Run(name, func(t *testing.T) {
-			if err := tc.body(); err != nil {
-				t.Fatal(err)
+
+	config := c.GetConfiguration("../../../config/provider/conformance.yml")
+
+	for _, pr := range config.Providers {
+		for _, upgradeVersion := range pr.Upgrade {
+			for name, tc := range cases {
+				t.Run(name, func(t *testing.T) {
+					if err := tc.body(pr.Package, upgradeVersion); err != nil {
+						t.Fatal(err)
+					}
+				})
 			}
-		})
+		}
 	}
+
 }
