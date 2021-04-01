@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package framework
+package provider
 
 import (
 	"context"
@@ -27,8 +27,8 @@ import (
 )
 
 // Wait for Provider to be successfully installed.
-func WaitForProviderToBeSuccessfullyInstalled(ctx context.Context, c client.Client) error {
-	if err := wait.PollImmediate(5*time.Second, 2*time.Minute, func() (bool, error) {
+func WaitForAllProvidersInstalled(ctx context.Context, c client.Client, interval time.Duration, timeout time.Duration) error {
+	if err := wait.PollImmediate(interval, timeout, func() (bool, error) {
 		l := &v1.ProviderList{}
 		if err := c.List(ctx, l); err != nil {
 			return false, err
@@ -52,8 +52,8 @@ func WaitForProviderToBeSuccessfullyInstalled(ctx context.Context, c client.Clie
 }
 
 // Wait for Provider to be successfully updated.
-func WaitForProviderToBeSuccessfullyUpdated(ctx context.Context, c client.Client, p2 string, p1 string) error {
-	if err := wait.PollImmediate(5*time.Second, 2*time.Minute, func() (bool, error) {
+func WaitForRevisionTransition(ctx context.Context, c client.Client, p2 string, p1 string, interval time.Duration, timeout time.Duration) error {
+	if err := wait.PollImmediate(interval, timeout, func() (bool, error) {
 		l := &v1.ProviderRevisionList{}
 		if err := c.List(ctx, l); err != nil {
 			return false, err
@@ -84,8 +84,8 @@ func WaitForProviderToBeSuccessfullyUpdated(ctx context.Context, c client.Client
 }
 
 // Wait for Provider to be successfully deleted.
-func WaitForProviderToBeSuccessfullyDeleted(ctx context.Context, c client.Client) error {
-	return wait.PollImmediate(5*time.Second, 30*time.Second, func() (bool, error) {
+func WaitForAllProvidersDeleted(ctx context.Context, c client.Client, interval time.Duration, timeout time.Duration) error {
+	return wait.PollImmediate(interval, timeout, func() (bool, error) {
 		l := &v1.ProviderList{}
 		if err := c.List(ctx, l); err != nil {
 			return false, err

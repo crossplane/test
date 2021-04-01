@@ -22,6 +22,7 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -32,7 +33,7 @@ import (
 	v1 "github.com/crossplane/crossplane/apis/pkg/v1"
 
 	pc "github.com/crossplane/test/apis/provider"
-	"github.com/crossplane/test/test/framework"
+	"github.com/crossplane/test/test/framework/provider"
 )
 
 func TestProviderUpgrade(t *testing.T) {
@@ -61,7 +62,7 @@ func TestProviderUpgrade(t *testing.T) {
 					return err
 				}
 				a := resource.NewAPIUpdatingApplicator(c)
-				provider := &v1.Provider{
+				p := &v1.Provider{
 					ObjectMeta: metav1.ObjectMeta{
 						Name: packageName,
 					},
@@ -72,33 +73,33 @@ func TestProviderUpgrade(t *testing.T) {
 					},
 				}
 				// Create initial Provider.
-				if err := a.Apply(ctx, provider); err != nil {
+				if err := a.Apply(ctx, p); err != nil {
 					return err
 				}
 
 				// Wait for Provider to be successfully installed.
-				if err := framework.WaitForProviderToBeSuccessfullyInstalled(ctx, c); err != nil {
+				if err := provider.WaitForAllProvidersInstalled(ctx, c, 5*time.Second, 2*time.Minute); err != nil {
 					return err
 				}
 
 				// Update Provider package.
-				provider.Spec.Package = upgradeProviderPackage
-				if err := a.Apply(ctx, provider); err != nil {
+				p.Spec.Package = upgradeProviderPackage
+				if err := a.Apply(ctx, p); err != nil {
 					return err
 				}
 
 				// Wait for Provider to be successfully updated.
-				if err := framework.WaitForProviderToBeSuccessfullyUpdated(ctx, c, upgradeProviderPackage, initialProviderPackage); err != nil {
+				if err := provider.WaitForRevisionTransition(ctx, c, upgradeProviderPackage, initialProviderPackage, 5*time.Second, 2*time.Minute); err != nil {
 					return err
 				}
 
 				// Clean up Provider.
-				if err := c.DeleteAllOf(ctx, provider); err != nil {
+				if err := c.DeleteAllOf(ctx, p); err != nil {
 					return err
 				}
 
 				// Wait for Provider to be successfully deleted.
-				return framework.WaitForProviderToBeSuccessfullyDeleted(ctx, c)
+				return provider.WaitForAllProvidersDeleted(ctx, c, 5*time.Second, 30*time.Second)
 			},
 		},
 	}
