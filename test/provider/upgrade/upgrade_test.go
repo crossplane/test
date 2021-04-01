@@ -22,29 +22,27 @@ import (
 	"context"
 	"strings"
 	"testing"
-	"time"
 
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/wait"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	v1 "github.com/crossplane/crossplane/apis/pkg/v1"
 
-	c "github.com/crossplane/test/apis/provider"
+	pc "github.com/crossplane/test/apis/provider"
+	"github.com/crossplane/test/test/framework"
 )
 
 func TestProviderUpgrade(t *testing.T) {
 	cases := map[string]struct {
 		reason string
-		body   func(providerPackage string, upgradeVersion c.UpgradeProviderVersion) error
+		body   func(providerPackage string, upgradeVersion pc.UpgradeProviderVersion) error
 	}{
 		"UpgradeProviderStableToLatest": {
 			reason: "Should be able to successfully update provider from latest stable to latest development build.",
-			body: func(providerPackage string, upgradeVersion c.UpgradeProviderVersion) error {
+			body: func(providerPackage string, upgradeVersion pc.UpgradeProviderVersion) error {
 
 				sl := strings.SplitAfter(providerPackage, "/")
 				packageName := sl[len(sl)-1]
@@ -79,24 +77,7 @@ func TestProviderUpgrade(t *testing.T) {
 				}
 
 				// Wait for Provider to be successfully installed.
-				if err := wait.PollImmediate(5*time.Second, 2*time.Minute, func() (bool, error) {
-					l := &v1.ProviderList{}
-					if err := c.List(ctx, l); err != nil {
-						return false, err
-					}
-					if len(l.Items) != 1 {
-						return false, nil
-					}
-					for _, p := range l.Items {
-						if p.GetCondition(v1.TypeInstalled).Status != corev1.ConditionTrue {
-							return false, nil
-						}
-						if p.GetCondition(v1.TypeHealthy).Status != corev1.ConditionTrue {
-							return false, nil
-						}
-					}
-					return true, nil
-				}); err != nil {
+				if err := framework.WaitForProviderToBeSuccessfullyInstalled(ctx, c); err != nil {
 					return err
 				}
 
@@ -107,31 +88,7 @@ func TestProviderUpgrade(t *testing.T) {
 				}
 
 				// Wait for Provider to be successfully updated.
-				if err := wait.PollImmediate(5*time.Second, 2*time.Minute, func() (bool, error) {
-					l := &v1.ProviderRevisionList{}
-					if err := c.List(ctx, l); err != nil {
-						return false, err
-					}
-					// There should be a revision present for the initial revision and the upgrade.
-					if len(l.Items) != 2 {
-						return false, nil
-					}
-					for _, p := range l.Items {
-						// New ProviderRevision should be Active.
-						if p.Spec.Package == upgradeProviderPackage && p.GetDesiredState() != v1.PackageRevisionActive {
-							return false, nil
-						}
-						// Old ProviderRevision should be Inactive.
-						if p.Spec.Package == initialProviderPackage && p.GetDesiredState() != v1.PackageRevisionInactive {
-							return false, nil
-						}
-						// Both ProviderRevisions should be healthy.
-						if p.GetCondition(v1.TypeHealthy).Status != corev1.ConditionTrue {
-							return false, nil
-						}
-					}
-					return true, nil
-				}); err != nil {
+				if err := framework.WaitForProviderToBeSuccessfullyUpdated(ctx, c, upgradeProviderPackage, initialProviderPackage); err != nil {
 					return err
 				}
 
@@ -141,18 +98,12 @@ func TestProviderUpgrade(t *testing.T) {
 				}
 
 				// Wait for Provider to be successfully deleted.
-				return wait.PollImmediate(5*time.Second, 30*time.Second, func() (bool, error) {
-					l := &v1.ProviderList{}
-					if err := c.List(ctx, l); err != nil {
-						return false, err
-					}
-					return len(l.Items) == 0, nil
-				})
+				return framework.WaitForProviderToBeSuccessfullyDeleted(ctx, c)
 			},
 		},
 	}
 
-	config := c.GetConfiguration("../../../config/provider/conformance.yml")
+	config := pc.GetConfiguration("../../../config/provider/conformance.yml")
 
 	for _, pr := range config.Providers {
 		for _, upgradeVersion := range pr.Upgrade {
