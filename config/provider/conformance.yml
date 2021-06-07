@@ -1,14 +1,14 @@
 providers:
 - package: crossplane/provider-gcp
   upgrade:
-  - initial: "v0.16.0"
+  - initial: "v0.17.1"
     final: "master"
 - package: crossplane/provider-aws
   upgrade:
-  - initial: "v0.17.0"
+  - initial: "v0.18.1"
     final: "master"
 - package: crossplane/provider-azure
   upgrade:
-  - initial: "v0.15.0"
+  - initial: "v0.16.1"
     final: "master"
   
