@@ -7,7 +7,7 @@ on:
   workflow_dispatch: {}
 
 env:
-  KIND_VERSION: 'v0.7.0'
+  KIND_VERSION: 'v0.11.1'
 
 jobs:
   crossplane-upgrade-test:
