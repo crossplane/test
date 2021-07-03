@@ -27,7 +27,7 @@ jobs:
         run: kubectl create namespace crossplane-system
         shell: bash
       - name: Install Crossplane from Stable
-        run: helm repo add crossplane-stable https://charts.crossplane.io/stable && helm repo update && helm install crossplane --namespace crossplane-system crossplane-stable/crossplane
+        run: helm repo add crossplane-stable https://charts.crossplane.io/stable && helm repo update && helm install crossplane --namespace crossplane-system crossplane-stable/crossplane --wait
         shell: bash
       - name: Run Provider Upgrade Tests
         run: go test -timeout 10m -v --tags=e2e_provider ./test/...
