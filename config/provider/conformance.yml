@@ -3,12 +3,11 @@ providers:
   upgrade:
   - initial: "v0.21.0"
     final: "master"
+- package: crossplane/provider-azure
+  upgrade:
+  - initial: "v0.19.0"
+    final: "master"  
 - package: crossplane/provider-aws
   upgrade:
   - initial: "v0.29.0"
     final: "master"
-- package: crossplane/provider-azure
-  upgrade:
-  - initial: "v0.19.0"
-    final: "master"
-  

@@ -78,7 +78,7 @@ func TestProviderUpgrade(t *testing.T) {
 				}
 
 				// Wait for Provider to be successfully installed.
-				if err := provider.WaitForAllProvidersInstalled(ctx, c, 5*time.Second, 2*time.Minute); err != nil {
+				if err := provider.WaitForAllProvidersInstalled(ctx, c, 5*time.Second, 2*time.Minute, t); err != nil {
 					return err
 				}
 
@@ -89,7 +89,7 @@ func TestProviderUpgrade(t *testing.T) {
 				}
 
 				// Wait for Provider to be successfully updated.
-				if err := provider.WaitForRevisionTransition(ctx, c, upgradeProviderPackage, initialProviderPackage, 5*time.Second, 2*time.Minute); err != nil {
+				if err := provider.WaitForRevisionTransition(ctx, c, upgradeProviderPackage, initialProviderPackage, 5*time.Second, 2*time.Minute, t); err != nil {
 					return err
 				}
 
@@ -99,7 +99,7 @@ func TestProviderUpgrade(t *testing.T) {
 				}
 
 				// Wait for Provider to be successfully deleted.
-				return provider.WaitForAllProvidersDeleted(ctx, c, 5*time.Second, 30*time.Second)
+				return provider.WaitForAllProvidersDeleted(ctx, c, 5*time.Second, 30*time.Second, t)
 			},
 		},
 	}
