@@ -7,18 +7,18 @@ on:
   workflow_dispatch: {}
 
 env:
-  GO_VERSION: '1.16'
-  KIND_VERSION: 'v0.11.1'
+  GO_VERSION: '1.18'
+  KIND_VERSION: 'v0.14.0'
 
 jobs:
   crossplane-upgrade-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Crossplane Release 1.1
+      - name: Checkout Crossplane Release 1.9
         uses: actions/checkout@v2
         with:
           repository: crossplane/crossplane
-          ref: release-1.1
+          ref: release-1.9
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
@@ -33,7 +33,7 @@ jobs:
         run: kubectl create namespace crossplane-system
         shell: bash
       - name: Install Crossplane from Stable
-        run: helm repo add crossplane-stable https://charts.crossplane.io/stable && helm repo update && helm install crossplane --namespace crossplane-system crossplane-stable/crossplane --version 1.1.0 --wait
+        run: helm repo add crossplane-stable https://charts.crossplane.io/stable && helm repo update && helm install crossplane --namespace crossplane-system crossplane-stable/crossplane --version 1.9.0 --wait
         shell: bash
       - name: Run E2E Tests for stable
         run: go test -p 1 -timeout 10m -v --tags=e2e ./test/e2e/...
