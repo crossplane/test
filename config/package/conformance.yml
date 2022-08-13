@@ -1,0 +1,3 @@
+packages:
+- registryName: google artifact registry
+  packageName: us-west1-docker.pkg.dev/crossplane-playground/xp-install-test/configuration:main
