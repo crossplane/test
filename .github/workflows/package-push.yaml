@@ -39,3 +39,5 @@ jobs:
         run: make -j2 build.all
       - name: Publish Packages
         run: make xpkg.push
+      - name: Publish Packages to Channel
+        run: VERSION=main make xpkg.push
