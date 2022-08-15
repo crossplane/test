@@ -30,6 +30,7 @@ UP_CHANNEL = stable
 XPKG_REGISTRY ?= us-west1-docker.pkg.dev
 XPKG_ORG ?= crossplane-playground/xp-install-test
 XPKG_REPO ?= configuration
+XPKG_TAG ?= $(VERSION)
 
 # ====================================================================================
 # Targets
@@ -77,8 +78,8 @@ xpkg.push: $(UP)
 	@$(UP) xpkg push \
 		--package $(OUTPUT_DIR)/xpkg/linux_amd64/xp-install-test-configuration-$(VERSION).xpkg \
 		--package $(OUTPUT_DIR)/xpkg/linux_arm64/xp-install-test-configuration-$(VERSION).xpkg \
-		$(XPKG_REGISTRY)/$(XPKG_ORG)/$(XPKG_REPO):$(VERSION) || $(FAIL)
-	@$(OK) Pushed package xp-install-test-configuration-$(VERSION).xpkg
+		$(XPKG_REGISTRY)/$(XPKG_ORG)/$(XPKG_REPO):$(XPKG_TAG) || $(FAIL)
+	@$(OK) Pushed package xp-install-test-configuration-$(VERSION).xpkg to $(XPKG_REGISTRY)/$(XPKG_ORG)/$(XPKG_REPO):$(XPKG_TAG)
 
 build.artifacts.platform: xpkg.build
 
