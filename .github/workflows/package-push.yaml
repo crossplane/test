@@ -40,4 +40,4 @@ jobs:
       - name: Publish Packages
         run: make xpkg.push
       - name: Publish Packages to Channel
-        run: VERSION=main make xpkg.push
+        run: XPKG_TAG=main make xpkg.push
