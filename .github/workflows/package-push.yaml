@@ -1,0 +1,43 @@
+name: package-push
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch: {}
+
+env:
+  GO_VERSION: '1.18'
+  GAR_USER: ${{ secrets.GAR_USER }}
+
+jobs:
+  provider-upgrade-crossplane-stable:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Test Repo
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+          fetch-depth: 0
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      # The tagger step uses the same logic in the build submodule to generate package tag
+      # https://github.com/upbound/build/blob/4f64913157a952dbe77cd9e05457d9abe695a1d4/makelib/common.mk#L193
+      - name: Set tag
+        run: echo "::set-output name=VERSION_TAG::$(git describe --dirty --always --tags | sed 's/-/./2' | sed 's/-/./2' )"
+        id: tagger
+      - name: Login to Google Artifact Registry
+        uses: docker/login-action@v1
+        if: env.GAR_USER != ''
+        with:
+          registry: https://us-west1-docker.pkg.dev
+          username: ${{ secrets.GAR_USER }}
+          password: ${{ secrets.GAR_SA_KEY }}
+      - name: Build Artifacts
+        run: make -j2 build.all
+      - name: Publish Packages
+        run: make xpkg.push
+      - name: Publish Packages to Channel
+        run: XPKG_TAG=main make xpkg.push
