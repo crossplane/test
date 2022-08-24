@@ -1,0 +1,47 @@
+name: private-package
+
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  pull_request: {}
+  workflow_dispatch: {}
+
+env:
+  GO_VERSION: '1.18'
+  KIND_VERSION: 'v0.14.0'
+
+jobs:
+  private-package-google:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Test Repo
+        uses: actions/checkout@v2
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: Setup Kind
+        uses: engineerd/setup-kind@v0.5.0
+        with:
+          version: ${{ env.KIND_VERSION }}
+      - name: Install Helm
+        uses: azure/setup-helm@v1
+      - name: Install Kubectl
+        uses: azure/setup-kubectl@v1
+      - name: Create Namespace
+        run: kubectl create namespace crossplane-system
+        shell: bash
+      # https://cloud.google.com/artifact-registry/docs/access-control#pullsecrets
+      - name: Create Pull Secret
+        run: |
+          kubectl create secret docker-registry package-pull-secret -n crossplane-system \
+          --docker-server=us-west1-docker.pkg.dev \
+          --docker-email=${{ secrets.GAR_EMAIL }} \
+          --docker-username=${{ secrets.GAR_USER }} \
+          --docker-password=${{ secrets.GAR_SA_KEY }}
+        shell: bash
+      - name: Install Latest Crossplane
+        run: helm repo add crossplane-master https://charts.crossplane.io/master/ && helm repo update && helm install crossplane --namespace crossplane-system crossplane-master/crossplane --devel --wait
+        shell: bash
+      - name: Run Private Package Install Tests
+        run: go test -timeout 10m -v --tags=e2e_package ./test/...
