@@ -77,7 +77,6 @@ xpkg.push: $(UP)
 	@$(INFO) Pushing package xp-install-test-configuration-$(VERSION).xpkg
 	@$(UP) xpkg push \
 		--package $(OUTPUT_DIR)/xpkg/linux_amd64/xp-install-test-configuration-$(VERSION).xpkg \
-		--package $(OUTPUT_DIR)/xpkg/linux_arm64/xp-install-test-configuration-$(VERSION).xpkg \
 		$(XPKG_REGISTRY)/$(XPKG_ORG)/$(XPKG_REPO):$(XPKG_TAG) || $(FAIL)
 	@$(OK) Pushed package xp-install-test-configuration-$(VERSION).xpkg to $(XPKG_REGISTRY)/$(XPKG_ORG)/$(XPKG_REPO):$(XPKG_TAG)
 
