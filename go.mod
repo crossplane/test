@@ -5,6 +5,8 @@ go 1.16
 require (
 	github.com/crossplane/crossplane v1.1.0
 	github.com/crossplane/crossplane-runtime v0.13.0
+	github.com/google/go-containerregistry v0.11.0 // indirect
+	github.com/spf13/afero v1.6.0 // indirect
 	k8s.io/api v0.20.5
 	k8s.io/apimachinery v0.20.5
 	k8s.io/client-go v0.20.5 // indirect
