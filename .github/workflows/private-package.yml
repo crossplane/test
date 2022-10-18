@@ -7,8 +7,8 @@ on:
   workflow_dispatch: {}
 
 env:
-  GO_VERSION: '1.18'
-  KIND_VERSION: 'v0.14.0'
+  GO_VERSION: '1.19'
+  KIND_VERSION: 'v0.16.0'
 
 jobs:
   private-package-google:
