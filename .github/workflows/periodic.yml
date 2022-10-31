@@ -8,6 +8,7 @@ on:
 
 env:
   GO_VERSION: '1.19'
+  HELM_VERSION: 'v3.9.0'
   KIND_VERSION: 'v0.16.0'
 
 jobs:
@@ -28,7 +29,9 @@ jobs:
         with:
           version: ${{ env.KIND_VERSION }}
       - name: Install Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v3
+        with:
+          version: ${{ env.HELM_VERSION }}
       - name: Install Kubectl
         uses: azure/setup-kubectl@v1
       - name: Create Namespace
@@ -56,7 +59,9 @@ jobs:
         with:
           version: ${{ env.KIND_VERSION }}
       - name: Install Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v3
+        with:
+          version: ${{ env.HELM_VERSION }}
       - name: Install Kubectl
         uses: azure/setup-kubectl@v1
       - name: Create Namespace
