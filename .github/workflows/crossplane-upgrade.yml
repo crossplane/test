@@ -15,11 +15,11 @@ jobs:
   crossplane-upgrade-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Crossplane Release 1.11
+      - name: Checkout Crossplane Release 1.12
         uses: actions/checkout@v2
         with:
           repository: crossplane/crossplane
-          ref: release-1.11
+          ref: release-1.12
       - name: Setup Go
         uses: actions/setup-go@v2
         with:
@@ -36,7 +36,7 @@ jobs:
         run: kubectl create namespace crossplane-system
         shell: bash
       - name: Install Crossplane from Stable
-        run: helm repo add crossplane-stable https://charts.crossplane.io/stable && helm repo update && helm install crossplane --namespace crossplane-system crossplane-stable/crossplane --version 1.11.3 --wait
+        run: helm repo add crossplane-stable https://charts.crossplane.io/stable && helm repo update && helm install crossplane --namespace crossplane-system crossplane-stable/crossplane --version 1.12.0 --wait
         shell: bash
       - name: Run E2E Tests for stable
         run: go test -p 1 -timeout 10m -v --tags=e2e ./test/e2e/...
